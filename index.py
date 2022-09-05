@@ -13,7 +13,16 @@ USERNAME = "edwinsromelus@gmail.com"
 PASSWORD = "Codingjefe12!"
 
 
-# Logs into Everbright
+def clear():
+    os.system('clear')
+
+
+def get_enerflo_url():
+    clear()
+
+    print("What is the enerflo URL?")
+    enerflo_url = input()
+    return enerflo_url
 
 
 def login_everbright():
@@ -26,8 +35,6 @@ def login_everbright():
     pass_field.send_keys(PASSWORD)
     time.sleep(2)
     log_in_button.click()
-
-# Logs into Enerflo
 
 
 def login_enerflo():
@@ -50,16 +57,56 @@ def open_tab():
     driver.switch_to.new_window('tab')
 
 
-os.system('clear')
-print("What is the enerflo URL?")
-enerflo_url = input()
+def has_numbers(string):
+    return any(char.isdigit() for char in string)
 
+
+def get_customer_info(element_text):
+    customer_info = []
+    customer_name = []
+    customer_address = []
+    slice_index = 0
+
+    for val in element_text.split():
+        if val.find('@') != -1 or val.find('(') != -1:
+            break
+
+        customer_info.append(val)
+
+    for index, val in enumerate(customer_info):
+        if has_numbers(val):
+            slice_index = int(index)
+            break
+
+    customer_name = ' '.join(customer_info[:slice_index])
+    customer_address = ' '.join(customer_info[slice_index:])
+
+    return (customer_name, customer_address)
+
+# initialize bot
+
+
+enerflo_url = get_enerflo_url()
 driver = webdriver.Chrome(service=s)
 
-login_everbright()
-open_tab()
 driver.get(enerflo_url)
 login_enerflo()
 
+time.sleep(2)
+customer_info_text = driver.find_element(
+    By.XPATH, '/html/body/div[1]/main/div[3]/div/div[7]/div[1]/div[1]/div/div[1]/h5').text
 
+
+# TODO refactor info object (solar design with name and address attributes)
+
+customer_name, customer_address = get_customer_info(customer_info_text)
+
+print(customer_name, customer_address)
+
+open_tab()
+login_everbright()
+
+
+# wait 3 seconds before quit
+time.sleep(3)
 driver.quit()
